@@ -22,3 +22,44 @@ Mô hình tốt nhất được lưu tại *./exp/model/best*
 Trong đó:
 --config: đường dẫn đến file config chứa các tham số của mô hình. Lưu ý, chỉ tên file, không phải đường dẫn. Mặc định: “default.yaml”
 --outfile: đường dẫn đến file log để lưu lại output của quá trình training. Lưu ý, chỉ tên file, không phải đường dẫn. Mặc định: “log.log””
+
+## Server
+Chỉnh sửa service.checkpoint_dir trong file *./config/default.yaml* sau đó chạy câu lệnh sau để chạy server
+```python main.py serve --config default.yaml```
+
+### API
+** http://127.0.0.1:8000/docs **
+** http://127.0.0.1:8000/docs#/default/infer_cls_number_infer_post**
+
+### API Documents
+- **Enpoint:** /cls_number/infer
+
+- **Header:**
+{"accept: "application/json", "Content-Type": "application/json"}
+
+- **Request body:**
+```
+{
+  "input_audio": "string",
+  "sample_rate": 0
+}
+```
+input_audio: Union(str, torch.Tensor) -> có thể là đường dẫn của audio dưới dạng string hoặc waveform (sau khi torch.load) dưới dạng torch.Tensor
+sample_rate: int -> mặc định là None, chỉ được sử dụng khi input_audio là waveform
+
+- **Response body:**
+```
+{
+  "labels": "string"
+}
+```
+labels: str -> kết quả gắn nhãn cho input_audio sau khi inference qua mô hình
+
+### Call API
+Thay đổi audio_input ở dòng x trong file *inference.py* để request API bằng code python
+
+
+
+
+
+

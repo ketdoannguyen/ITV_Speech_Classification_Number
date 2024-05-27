@@ -9,6 +9,7 @@ from transformers import WhisperFeatureExtractor
 
 from speech_number.trainer import Trainer
 from torch.utils.data import random_split
+from speech_number.service.service_predict import start_aap_service
 
 
 @click.group()
@@ -92,6 +93,15 @@ def train(config, outfile):
         yaml.dump(config, file, default_flow_style=False)
 
     print(f"Điểm tốt nhất {best_score} tại seed {seed}")
+
+
+@root.command("serve")
+@click.option("--config", default="default.yaml", help="Config path")
+def serve(config):
+    with open(config, "r") as f:
+        config = yaml.safe_load(f)
+    start_aap_service(config["service"]["checkpoint_dir"])
+    
 
 if __name__ == "__main__":
     root()

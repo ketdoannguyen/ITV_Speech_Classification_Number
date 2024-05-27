@@ -13,11 +13,11 @@ from transformers import WhisperFeatureExtractor
 class ClsNumber():
     def __init__(self, checkpoint_dir):
         self.model = WhisperEncoderCustomize.from_pretrained(checkpoint_dir)
-        self.feature_extractor = WhisperFeatureExtractor.from_pretrained(checkpoint_dir)
+        self.feature_extractor = WhisperFeatureExtractor.from_pretrained("vinai/PhoWhisper-tiny")
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
         self.model.eval()
-        self.index2label = self.load_vocab()
+        # self.index2label = self.load_vocab()
         
     def load_vocab(self):
         with open('vocab_dataset.json', 'r') as file:
