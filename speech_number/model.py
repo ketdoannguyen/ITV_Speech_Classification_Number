@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import json
+import os
 from typing import Optional
 
 import numpy as np
@@ -7,6 +8,7 @@ import tqdm
 from transformers.modeling_outputs import ModelOutput
 from transformers.models.whisper.modeling_whisper import WhisperEncoder, WhisperPreTrainedModel
 import torch
+import torchaudio
 from torch import nn
 
 from speech_number.base_model import BaseModel
@@ -48,9 +50,12 @@ class WhisperEncoderCustomize(WhisperPreTrainedModel, BaseModel):
         x = self.dropout(x)
         x = self.out_proj(x) # (N, 1, 22)
         cls_logits = x.squeeze(1)
-
-        loss_fn = nn.CrossEntropyLoss()
-        loss = loss_fn(cls_logits, labels)
+        
+        if labels is not None:
+            loss_fn = nn.CrossEntropyLoss()
+            loss = loss_fn(cls_logits, labels)
+        else:
+            loss = 0
 
         return WhisperEncoderOutput(
             encoder_hidden_states=encoder_hidden_states,
@@ -164,6 +169,25 @@ class WhisperEncoderCustomize(WhisperPreTrainedModel, BaseModel):
 
         total_size_mb = total_size / (1024 * 1024)
         print(f"Số lượng tham số : {round(total_param/1000000, 3)}M . Kích thước mô hình : {round(total_size_mb, 3)} MB")
+
+    def predict(self, feature_extractor, model, index2label, input_audio, sample_rate=None):
+        if isinstance(input_audio, str):
+            assert not os.path.exists(input_audio), f"Đường dẫn {input_audio} không tồn tại"
+            waveform, sample_rate = torchaudio.load(input_audio)
+        else:
+            waveform = input_audio
+            
+        new_sample_rate = 16000
+        waveform = torchaudio.transforms.Resample(sample_rate, new_sample_rate)(waveform)
+        waveform = waveform.squeeze()
+        input_features = feature_extractor(waveform, sampling_rate=new_sample_rate, return_tensors="pt").input_features
+        
+        with torch.no_grad():
+            output = model(input_features, labels=None).to(self.device)
+            predicts = torch.argmax(output.cls_logits.detach().cpu(), dim=-1).tolist()
+        
+        labels_predict = index2label.get(predicts, -1)
+        return labels_predict
 
 if __name__ == "__main__":
     model_name = "vinai/PhoWhisper-tiny"

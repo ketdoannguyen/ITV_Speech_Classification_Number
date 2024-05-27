@@ -1,3 +1,4 @@
+import json
 import torch
 import torchaudio
 import tqdm
@@ -30,6 +31,12 @@ class WhisperClsDataset(Dataset):
         for i, label in enumerate(labels):
             label2index[label] = i
             index2label[i] = label
+        vocab_dataset = {
+            "label2index": label2index,
+            "index2label": index2label
+        }
+        with open("vocab_dataset.json", "w", encoding='utf-8') as f:
+            json.dump(vocab_dataset, f, ensure_ascii=False, indent=4)
         return label2index, index2label, len(label2index)
 
     def _process_audio(self, batch):

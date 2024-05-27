@@ -4,3 +4,6 @@ torchaudio==2.0.0
 torch==2.0.0
 wandb
 scikit-learn
+fastapi
+uvicorn
+pydantic
