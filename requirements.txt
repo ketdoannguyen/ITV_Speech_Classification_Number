@@ -7,3 +7,9 @@ scikit-learn
 fastapi
 uvicorn
 pydantic
+
+
+# ui
+streamlit-audiorec
+soundfile
+streamlit
