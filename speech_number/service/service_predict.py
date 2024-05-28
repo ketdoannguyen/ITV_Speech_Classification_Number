@@ -35,7 +35,7 @@ def start_aap_service(checkpoint_dir):
     async def infer(data: InferenceRequest) -> InferenceResponse:
         # read data
         input_audio = data["input_audio"]
-        sample_rate = data["sample_rate"]
+        sample_rate = data["sample_rate"] if sample_rate in data.keys() else None
         
         assert input_audio is None, "Không có input của audio để inference"
             
