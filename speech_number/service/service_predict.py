@@ -38,11 +38,7 @@ def start_aap_service(checkpoint_dir):
         
         input_audio = data.input_audio
         sample_rate = data.sample_rate # if sample_rate in data.keys() else None
-        
-        print("-"*100)
-        print(input_audio)
-        print(sample_rate)
-        print("-"*100)
+    
 
         assert input_audio is not None, "Không có input của audio để inference"
         # run model
