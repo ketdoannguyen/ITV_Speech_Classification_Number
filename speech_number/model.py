@@ -174,7 +174,7 @@ class WhisperEncoderCustomize(WhisperPreTrainedModel, BaseModel):
             # assert not os.path.exists(input_audio), f"Đường dẫn {input_audio} không tồn tại"
             waveform, sample_rate = torchaudio.load(input_audio)
         else:
-            waveform = input_audio
+            waveform = torch.FloatTensor(input_audio).view(1, -1)
             
         new_sample_rate = 16000
         waveform = torchaudio.transforms.Resample(sample_rate, new_sample_rate)(waveform)
