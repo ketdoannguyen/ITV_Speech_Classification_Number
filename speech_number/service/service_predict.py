@@ -20,7 +20,7 @@ class ClsNumber():
         self.index2label = self.load_vocab()
         
     def load_vocab(self):
-        with open('vocab_dataset.json', 'r') as file:
+        with open('./vocab_dataset.json', 'r', encoding="utf8") as file:
             data = json.load(file)
         return data["index2label"]
     
@@ -38,6 +38,11 @@ def start_aap_service(checkpoint_dir):
         
         input_audio = data.input_audio
         sample_rate = data.sample_rate # if sample_rate in data.keys() else None
+        
+        print("-"*100)
+        print(input_audio)
+        print(sample_rate)
+        print("-"*100)
 
         assert input_audio is not None, "Không có input của audio để inference"
         # run model
