@@ -28,14 +28,14 @@ class WhisperEncoderCustomize(WhisperPreTrainedModel, BaseModel):
         self.encoder = WhisperEncoder(config)
         self.matrix_transpose = torch.nn.Linear(1500, 1)
         self.norm = nn.BatchNorm1d(384)
-        self.gelu = nn.Tanh()
+        self.tanh = nn.Tanh()
         self.dropout = nn.Dropout(0.1)
         self.out_proj = nn.Linear(384, 22)
 
     def forward(self, input_features, labels):
         # Whisper encoder
-        encoder_outputs = self.encoder(input_features) # (N, 1500, 384)
-        encoder_hidden_states = encoder_outputs.last_hidden_state
+        encoder_outputs = self.encoder(input_features) 
+        encoder_hidden_states = encoder_outputs.last_hidden_state # (N, 1500, 384)
         # Dropout
         x = self.dropout(encoder_hidden_states)
 
@@ -45,7 +45,7 @@ class WhisperEncoderCustomize(WhisperPreTrainedModel, BaseModel):
         cls_hidden_states  = x.transpose(1, 2) # (N, 1, 384)
 
 
-        x = self.gelu(cls_hidden_states)
+        x = self.tanh(cls_hidden_states)
         x = self.dropout(x)
         x = self.out_proj(x) # (N, 1, 22)
         cls_logits = x.squeeze(1)

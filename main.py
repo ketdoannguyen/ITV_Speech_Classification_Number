@@ -89,6 +89,7 @@ def train(config, outfile):
             seed = seeds[train_time]
 
     config["train"]["seed_best"] = seed
+    config["train"]["best_score"] = best_score
     with open(config_path, 'w') as file:
         yaml.dump(config, file, default_flow_style=False)
 
