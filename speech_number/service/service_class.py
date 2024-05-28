@@ -1,14 +1,11 @@
-from typing import Union, List
+from typing import Union
 from pydantic import BaseModel
-import torch
-
 
 class InferenceResponse(BaseModel):
-    labels: str
-
+    label: str
 
 class InferenceRequest(BaseModel):
-    input_audio: Union[str, torch.Tensor] = None
+    input_audio: Union[str, list, None] = None
     sample_rate: int = None
 
     class Config:

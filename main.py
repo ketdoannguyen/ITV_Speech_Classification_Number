@@ -98,7 +98,8 @@ def train(config, outfile):
 @root.command("serve")
 @click.option("--config", default="default.yaml", help="Config path")
 def serve(config):
-    with open(config, "r") as f:
+    config_path = "./configs/" + config
+    with open(config_path, "r") as f:
         config = yaml.safe_load(f)
     start_aap_service(config["service"]["checkpoint_dir"])
     
