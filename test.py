@@ -1,6 +1,7 @@
 
-from speech_number.service.service_predict import start_aap_service
+from speech_number.service.service_predict import infer
 
-
-if __name__ == "__main__":
-    start_aap_service("./exp/models/best")
+data = {
+    "input_audio": "/media/vkuai/01D7F711799324B0/ketdoan/ITV_Speech_Classification_Number/dataset/audio_count_web/xac_nhan_1.wav",
+}
+print(infer("./exp/models/best", data))

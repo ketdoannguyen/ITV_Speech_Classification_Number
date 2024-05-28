@@ -17,7 +17,7 @@ class ClsNumber():
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
         self.model.eval()
-        # self.index2label = self.load_vocab()
+        self.index2label = self.load_vocab()
         
     def load_vocab(self):
         with open('vocab_dataset.json', 'r') as file:
@@ -25,7 +25,7 @@ class ClsNumber():
         return data["index2label"]
     
     def run(self, input_audio, sample_rate=None):
-        return self.model.predict(self.feature_extractor, self.model, self.index2label, input_audio, sample_rate)[0]
+        return self.model.predict(self.feature_extractor, self.model, self.index2label, input_audio, sample_rate)
 
 def start_aap_service(checkpoint_dir):
     fast_infer = FastAPI()
@@ -54,10 +54,11 @@ def infer(checkpoint_dir, data: InferenceRequest) -> InferenceResponse:
     cls_number = ClsNumber(checkpoint_dir)
     # read data
     input_audio = data["input_audio"]
-    sample_rate = data["sample_rate"]
+    sample_rate = data["sample_rate"] if "sample_rate" in data.keys() else None
     
-    assert input_audio is None, "Không có input của audio để inference"
-        
+    assert input_audio is not None, "Không có input của audio để inference"
+    print("-"*80)
+    print(input_audio)
     # run model
     model_outputs = cls_number.run(input_audio, sample_rate)
 

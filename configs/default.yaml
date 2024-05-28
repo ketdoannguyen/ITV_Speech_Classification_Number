@@ -1,10 +1,10 @@
 data:
-  data_csv_dir: "./dataset/count_number.csv"
+  data_csv_dir: "./dataset/speech_data.csv"
 
 train:
   n_train: 10
   pre_trained_model: "vinai/PhoWhisper-tiny" #"vinai/PhoWhisper-tiny"
-  epoch_num: 80
+  epoch_num: 30
   train_batch_size: 24
   test_batch_size: 24
   lr: 0.00005

@@ -25,7 +25,6 @@ class WhisperEncoderOutput(ModelOutput):
 class WhisperEncoderCustomize(WhisperPreTrainedModel, BaseModel):
     def __init__(self, config):
         super().__init__(config)
-
         self.encoder = WhisperEncoder(config)
         self.matrix_transpose = torch.nn.Linear(1500, 1)
         self.norm = nn.BatchNorm1d(384)
@@ -172,7 +171,7 @@ class WhisperEncoderCustomize(WhisperPreTrainedModel, BaseModel):
 
     def predict(self, feature_extractor, model, index2label, input_audio, sample_rate=None):
         if isinstance(input_audio, str):
-            assert not os.path.exists(input_audio), f"Đường dẫn {input_audio} không tồn tại"
+            # assert not os.path.exists(input_audio), f"Đường dẫn {input_audio} không tồn tại"
             waveform, sample_rate = torchaudio.load(input_audio)
         else:
             waveform = input_audio
@@ -181,12 +180,12 @@ class WhisperEncoderCustomize(WhisperPreTrainedModel, BaseModel):
         waveform = torchaudio.transforms.Resample(sample_rate, new_sample_rate)(waveform)
         waveform = waveform.squeeze()
         input_features = feature_extractor(waveform, sampling_rate=new_sample_rate, return_tensors="pt").input_features
-        
+        input_features = input_features.to(self.device)
         with torch.no_grad():
-            output = model(input_features, labels=None).to(self.device)
+            output = model(input_features, labels=None)
             predicts = torch.argmax(output.cls_logits.detach().cpu(), dim=-1).tolist()
-        
-        labels_predict = index2label.get(predicts, -1)
+
+        labels_predict = index2label.get(str(predicts[0]), -1)
         return labels_predict
 
 if __name__ == "__main__":
