@@ -88,6 +88,7 @@ def main():
                     r = requests.post(url=url, json=data)
 
                     # Hiển thị thông báo
+                    print(f"Path khi chưa gửi feedback: {OUT_WAV_FILE}")
                     st.success(f"Kết quả dự đoán: {r.json()['label']}")
                 else:
                     st.warning("The audio data is empty.")
@@ -97,6 +98,7 @@ def main():
         """)
         feedback = st.text_input("Phản hồi", placeholder="Nhập phản hồi ở đây...")
         if st.button("Gửi phản hồi"):
+            print(f"Path khi gửi feedback: {OUT_WAV_FILE}")
             handle_feedback(feedback, r, DB)
 
 
