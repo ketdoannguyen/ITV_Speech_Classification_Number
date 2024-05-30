@@ -65,7 +65,8 @@ class WhisperClsDataset(Dataset):
     
     def custom_collate_fn(self, batch):
         return torch.stack(batch, dim=0)
-    
+
+
 if __name__ == "__main__":
     model_name = "vinai/PhoWhisper-tiny"
     feature_extractor = AutoFeatureExtractor.from_pretrained(model_name)
