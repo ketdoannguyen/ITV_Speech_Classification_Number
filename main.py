@@ -89,6 +89,7 @@ def main():
 
                     # Hiển thị thông báo
                     print(f"Path khi chưa gửi feedback: {OUT_WAV_FILE}")
+                    print("---------", r)
                     st.success(f"Kết quả dự đoán: {r.json()['label']}")
                     handle_feedback(None, r, DB, OUT_WAV_FILE)
                 else:
