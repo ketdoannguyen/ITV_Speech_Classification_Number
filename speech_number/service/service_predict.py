@@ -20,7 +20,7 @@ class ClsNumber():
         self.index2label = self.load_vocab()
         
     def load_vocab(self):
-        with open('./vocab_dataset.json', 'r', encoding="utf8") as file:
+        with open('./dataset/vocab_dataset.json', 'r', encoding="utf8") as file:
             data = json.load(file)
         return data["index2label"]
     
