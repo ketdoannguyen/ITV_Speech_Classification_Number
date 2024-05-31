@@ -7,7 +7,8 @@
 conda create -n cls_num_env python=3.10 -y
 ```
 - B2: Chạy lệnh sau để kích hoạt môi trường cls_num_env.
-```conda activate cls_num_env
+```
+conda activate cls_num_env
 ```
 - B3: cài đặt các thư viện cần thiết cho dự án.
 ```
@@ -78,8 +79,9 @@ python main.py serve --config default.yaml
 }
 ```
 
-- input_audio: Union(str, torch.Tensor) -> có thể là đường dẫn của audio dưới dạng string hoặc waveform (sau khi torch.load) dưới dạng torch.Tensor
-- sample_rate: int -> mặc định là None, chỉ được sử dụng khi input_audio là waveform
+input_audio: Union(str, torch.Tensor) -> có thể là đường dẫn của audio dưới dạng string hoặc waveform (sau khi torch.load) dưới dạng torch.Tensor
+
+sample_rate: int -> mặc định là None, chỉ được sử dụng khi input_audio là waveform
 
 - **Response body:**
 
