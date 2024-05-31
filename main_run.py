@@ -116,6 +116,7 @@ def serve(config):
 
     augment = AugmentData(input_dir=config["data"]["data_audio_dir"], output_dir=config["data"]["data_augment_dir"])
 
-    augment.run(config=config["augment"])
+    data_config = config["augment"] | config["data"]
+    augment.run(config=data_config)
 if __name__ == "__main__":
     root()
