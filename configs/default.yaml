@@ -1,5 +1,13 @@
 data:
   data_csv_dir: "./dataset/speech_data.csv"
+  data_audio_dir: "./dataset/audio"
+  data_augment_dir: "./dataset/augment"
+  data_augment_csv: "./dataset/augment_data.csv"
+
+augment:
+  change_speech: [0.8, 1.5]
+  change_pitch: [-0.5, 1]
+  change_volume: [0.2, 4]
 
 train:
   n_train: 10

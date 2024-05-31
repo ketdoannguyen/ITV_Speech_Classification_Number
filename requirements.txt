@@ -13,3 +13,7 @@ pydantic
 streamlit-audiorec
 soundfile
 streamlit
+
+#agument
+librosa
+soundfile
