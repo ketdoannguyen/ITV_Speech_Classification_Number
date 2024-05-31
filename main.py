@@ -81,8 +81,8 @@ def main():
                         "input_audio": waveform.tolist(),
                         "sample_rate": sample_rate
                     }
-                    # url="http://127.0.0.1:8000/cls_number/infer"
-                    url = "https://cls-number-nkd.onrender.com/cls_number/infer"
+                    url="http://127.0.0.1:8000/cls_number/infer"
+                    # url = "https://cls-number-nkd.onrender.com/cls_number/infer"
                     # sending post request and saving response as response object
                     r = requests.post(url=url, json=data)
 
