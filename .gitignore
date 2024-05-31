@@ -1,3 +1,5 @@
 /wandb
-/dataset
-/exp
+/dataset/raw_data
+/dataset/test_data
+/dataset/train_data
+/dataset/train_aug
