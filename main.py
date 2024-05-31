@@ -89,7 +89,7 @@ def main():
 
                     # Hiển thị thông báo
                     print(f"Path khi chưa gửi feedback: {OUT_WAV_FILE}")
-                    print(r.json())
+                    print("---------", r)
                     st.success(f"Kết quả dự đoán: {r.json()['label']}")
                 else:
                     st.warning("The audio data is empty.")
