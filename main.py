@@ -74,7 +74,7 @@ def main():
                     OUT_WAV_FILE = f"{int(time.time())}.wav"
                     sf.write(OUT_WAV_FILE, audio_array, 44100)
                     waveform, sample_rate = torchaudio.load(OUT_WAV_FILE)
-                    os.remove(OUT_WAV_FILE)
+                    
 
                     # call api
                     # data to be sent to api
