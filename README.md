@@ -3,11 +3,16 @@
 ## Install
 
 - B1: Sử dụng minconda khởi tạo 1 python env với python version = 3.10.
-1. ```conda create -n cls_num_env python=3.10 -y```
+```
+conda create -n cls_num_env python=3.10 -y
+```
 - B2: Chạy lệnh sau để kích hoạt môi trường cls_num_env.
-2. ```conda activate cls_num_env```
+```conda activate cls_num_env
+```
 - B3: cài đặt các thư viện cần thiết cho dự án.
-3. ```pip install -r requirements.txt```
+```
+pip install -r requirements.txt
+```
 
 ## Dữ liệu
 
@@ -41,9 +46,9 @@ python main.py train --config default.yaml --outfile log.log --is_aug True
   Mô hình tốt nhất được lưu tại _./exp/model/best_
 
 Trong đó:
---config: đường dẫn đến file config chứa các tham số của mô hình. Lưu ý, chỉ tên file, không phải đường dẫn. Mặc định: “default.yaml”
---outfile: đường dẫn đến file log để lưu lại output của quá trình training. Lưu ý, chỉ tên file, không phải đường dẫn. Mặc định: “log.log””
---is_aug: có tăng cường dữ liệu trước khi training hay không. Mặc định True
+1. --config: đường dẫn đến file config chứa các tham số của mô hình. Lưu ý, chỉ tên file, không phải đường dẫn. Mặc định: “default.yaml”
+2. --outfile: đường dẫn đến file log để lưu lại output của quá trình training. Lưu ý, chỉ tên file, không phải đường dẫn. Mặc định: “log.log””
+3. --is_aug: có tăng cường dữ liệu trước khi training hay không. Mặc định True
 
 ## Server
 
@@ -73,8 +78,8 @@ python main.py serve --config default.yaml
 }
 ```
 
-input_audio: Union(str, torch.Tensor) -> có thể là đường dẫn của audio dưới dạng string hoặc waveform (sau khi torch.load) dưới dạng torch.Tensor
-sample_rate: int -> mặc định là None, chỉ được sử dụng khi input_audio là waveform
+- input_audio: Union(str, torch.Tensor) -> có thể là đường dẫn của audio dưới dạng string hoặc waveform (sau khi torch.load) dưới dạng torch.Tensor
+- sample_rate: int -> mặc định là None, chỉ được sử dụng khi input_audio là waveform
 
 - **Response body:**
 
@@ -84,7 +89,7 @@ sample_rate: int -> mặc định là None, chỉ được sử dụng khi input
 }
 ```
 
-labels: str -> kết quả gắn nhãn cho input_audio sau khi inference qua mô hình
+- labels: str -> kết quả gắn nhãn cho input_audio sau khi inference qua mô hình
 
 ### Call API
 
