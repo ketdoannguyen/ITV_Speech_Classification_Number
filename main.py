@@ -26,7 +26,7 @@ def colorize(value):
         return ""
 
 
-def handle_feedback(feedback, r, DB, OUT_WAV_FILE):
+def handle_feedback(feedback, r, DB, OUT_WAV_FILE, is_click=False):
     bucket_res = DB.storage.from_("data-feedback").upload(file=OUT_WAV_FILE,
                                                           path=f"{OUT_WAV_FILE}",
                                                           file_options={"content-type": "audio/wav"})
@@ -39,8 +39,11 @@ def handle_feedback(feedback, r, DB, OUT_WAV_FILE):
             "label_predicted": r.json().get('label'),
             "feedback": feedback if feedback else None
         }
-
-        response = DB.table("feedback-data").insert(feedback_data).execute()
+        
+        if is_click:
+            response = DB.table("feedback-data").update({'feedback': feedback}).eq('audio_url', wav_url).execute()
+        else:
+            response = DB.table("feedback-data").insert(feedback_data).execute()
         print(f"DB: {response}")
 
         if response:
@@ -70,7 +73,7 @@ def main():
 
                 if len(audio_array) > 0:
                     # tạo file wav từ audio array
-                    OUT_WAV_FILE = f"./upload/{int(time.time())}.wav"
+                    OUT_WAV_FILE = f"{int(time.time())}.wav"
                     sf.write(OUT_WAV_FILE, audio_array, 44100)
                     waveform, sample_rate = torchaudio.load(OUT_WAV_FILE)
                     
@@ -82,8 +85,7 @@ def main():
                         "sample_rate": sample_rate
                     }
                     url="http://127.0.0.1:8000/cls_number/infer"
-                    # url = "https://cls-number-nkd.onrender.com/cls_number/infer"
-                    # sending post request and saving response as response object
+
                     r = requests.post(url=url, json=data)
 
                     # Hiển thị thông báo
@@ -94,13 +96,13 @@ def main():
                 else:
                     st.warning("The audio data is empty.")
 
-        st.write("""
-        ### Phản hồi của khách hàng
-        """)
-        feedback = st.text_input("Phản hồi", placeholder="Nhập phản hồi ở đây...")
-        if st.button("Gửi phản hồi"):
-            print(f"Path khi gửi feedback: {OUT_WAV_FILE}")
-            handle_feedback(feedback, r, DB, OUT_WAV_FILE)
+            st.write("""
+            ### Phản hồi của khách hàng
+            """)
+            feedback = st.text_input("Phản hồi", placeholder="Nhập phản hồi ở đây...")
+            if st.button("Gửi phản hồi"):
+                print(f"Path khi gửi feedback: {OUT_WAV_FILE}")
+                handle_feedback(feedback, r, DB, OUT_WAV_FILE, is_click=True)
 
 
 if __name__ == "__main__":
