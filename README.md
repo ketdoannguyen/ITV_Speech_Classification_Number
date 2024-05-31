@@ -16,6 +16,12 @@
 
 ## Dữ liệu
 
+- B1: Chỉnh sửa các tham số ở phần augment trong đường dẫn file _./configs/default.yaml_. Ví dụ: **change_pitch: [-0.5, 1]** thì [-0.5, 1] là 2 con số tương ứng lần lược là pitch giảm và pitch tăng. Bạn có thể điều chỉnh các con số đó phù hợp data của mình
+- B2: Chỉnh sửa các tham số ở phần data trong đường dẫn file _./configs/default.yaml_. Gồm các đường dẫn file csv, folder lưu data augment.
+
+- B3: Gõ lệnh sau để bắt đầu quá trình train
+  `python main_run.py augment --config default.yaml`
+
 ## Train
 
 - B1: Chỉnh sửa các tham số training và đường dẫn data trong file _./configs/default.yaml_
@@ -32,7 +38,7 @@ Trong đó:
 
 ## Server
 
-Chỉnh sửa service.checkpoint_dir trong file _./config/default.yaml_ sau đó chạy câu lệnh sau để chạy server
+Chỉnh sửa service.checkpoint*dir trong file *./config/default.yaml\_ sau đó chạy câu lệnh sau để chạy server
 `python main.py serve --config default.yaml`
 
 ### API
@@ -71,4 +77,4 @@ labels: str -> kết quả gắn nhãn cho input_audio sau khi inference qua mô
 
 ### Call API
 
-Thay đổi audio_input ở dòng x trong file _inference.py_ để request API bằng code python
+Thay đổi audio*input ở dòng x trong file \_inference.py* để request API bằng code python
