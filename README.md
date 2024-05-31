@@ -11,6 +11,8 @@
 ## Run
 - Chạy câu lệnh để run UI
 ```streamlit run main.py```
+- host ngrok
+```ngrok http http://localhost:8501```
 
 
 
