@@ -3,21 +3,26 @@
 ## Install
 
 - B1: Sử dụng minconda khởi tạo 1 python env với python version = 3.10.
-
 1. `conda create -n cls_num_env python=3.10 -y`
-- B2: Chạy lệnh sau để kích hoạt môi trường tsd_env.
-2. `conda activate tsd_env`
+- B2: Chạy lệnh sau để kích hoạt môi trường cls_num_env.
+2. `conda activate cls_num_env`
 - B3: cài đặt các thư viện cần thiết cho dự án.
-
 3. `pip install -r requirements.txt`
 
 ## Dữ liệu
 
+### Split train test
+
+Chạy lệnh sau để split train set data
+`python main.py split_train_test --config default.yaml test_split 0.2`
+
+
+### Augment data
+
 - B1: Chỉnh sửa các tham số ở phần augment trong đường dẫn file _./configs/default.yaml_. Ví dụ: **change_pitch: [-0.5, 1]** thì [-0.5, 1] là 2 con số tương ứng lần lược là pitch giảm và pitch tăng. Bạn có thể điều chỉnh các con số đó phù hợp data của mình
 - B2: Chỉnh sửa các tham số ở phần data trong đường dẫn file _./configs/default.yaml_. Gồm các đường dẫn file csv, folder lưu data augment.
-
-- B3: Gõ lệnh sau để bắt đầu quá trình train
-  `python main_run.py augment --config default.yaml`
+- B3: Gõ lệnh sau để bắt đầu quá trình tăng cường dữ liệu, mặc định dữ liệu tăng cường được lưu tại *./dataset/train_aug*
+  `python main.py augment --config default.yaml`
 
 ## Train
 
@@ -26,12 +31,13 @@
   - Tên của pretrain model theo format của huggingface. VD: _vinai/PhoWhisper-tiny_
   - Đường dẫn đến pretrain model folder trên local. VD: _./exp/models/best"_
 - B3: Gõ lệnh sau để bắt đầu quá trình train
-  `python main.py train --config default.yaml --outfile log.log`
+  `python main.py train --config default.yaml --outfile log.log --is_aug True`
   Mô hình tốt nhất được lưu tại _./exp/model/best_
 
 Trong đó:
 --config: đường dẫn đến file config chứa các tham số của mô hình. Lưu ý, chỉ tên file, không phải đường dẫn. Mặc định: “default.yaml”
 --outfile: đường dẫn đến file log để lưu lại output của quá trình training. Lưu ý, chỉ tên file, không phải đường dẫn. Mặc định: “log.log””
+--is_aug: có tăng cường dữ liệu trước khi training hay không. Mặc định True
 
 ## Server
 
