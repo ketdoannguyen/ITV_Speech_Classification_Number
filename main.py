@@ -26,7 +26,7 @@ def colorize(value):
         return ""
 
 
-def handle_feedback(feedback, r, DB):
+def handle_feedback(feedback, r, DB, OUT_WAV_FILE):
     if OUT_WAV_FILE:
         bucket_res = DB.storage.from_("data-feedback").upload(file=OUT_WAV_FILE,
                                                               path=f"{OUT_WAV_FILE}",
@@ -90,6 +90,7 @@ def main():
                     # Hiển thị thông báo
                     print(f"Path khi chưa gửi feedback: {OUT_WAV_FILE}")
                     st.success(f"Kết quả dự đoán: {r.json()['label']}")
+                    handle_feedback(None, r, DB, OUT_WAV_FILE)
                 else:
                     st.warning("The audio data is empty.")
 
@@ -99,7 +100,7 @@ def main():
         feedback = st.text_input("Phản hồi", placeholder="Nhập phản hồi ở đây...")
         if st.button("Gửi phản hồi"):
             print(f"Path khi gửi feedback: {OUT_WAV_FILE}")
-            handle_feedback(feedback, r, DB)
+            handle_feedback(feedback, r, DB, OUT_WAV_FILE)
 
 
 if __name__ == "__main__":
