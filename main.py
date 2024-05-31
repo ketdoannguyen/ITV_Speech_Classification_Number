@@ -27,31 +27,30 @@ def colorize(value):
 
 
 def handle_feedback(feedback, r, DB, OUT_WAV_FILE):
-    if OUT_WAV_FILE:
-        bucket_res = DB.storage.from_("data-feedback").upload(file=OUT_WAV_FILE,
-                                                              path=f"{OUT_WAV_FILE}",
-                                                              file_options={"content-type": "audio/wav"})
-        if bucket_res:
-            wav_url = DB.storage.from_("data-feedback").get_public_url(path=OUT_WAV_FILE)
-            print(f"Wav url: {wav_url}")
+    bucket_res = DB.storage.from_("data-feedback").upload(file=OUT_WAV_FILE,
+                                                          path=f"{OUT_WAV_FILE}",
+                                                          file_options={"content-type": "audio/wav"})
+    if bucket_res:
+        wav_url = DB.storage.from_("data-feedback").get_public_url(path=OUT_WAV_FILE)
+        print(f"Wav url: {wav_url}")
 
-            feedback_data = {
-                "audio_url": wav_url,
-                "label_predicted": r.json().get('label'),
-                "feedback": feedback if feedback else None
-            }
+        feedback_data = {
+            "audio_url": wav_url,
+            "label_predicted": r.json().get('label'),
+            "feedback": feedback if feedback else None
+        }
 
-            response = DB.table("feedback-data").insert(feedback_data).execute()
-            print(f"DB: {response}")
+        response = DB.table("feedback-data").insert(feedback_data).execute()
+        print(f"DB: {response}")
 
-            if response:
-                st.success("Cảm ơn bạn đã phản hồi!")
-                if os.path.exists(OUT_WAV_FILE):
-                    os.remove(OUT_WAV_FILE)
-            else:
-                st.error("Lỗi!!!")
+        if response:
+            st.success("Cảm ơn bạn đã phản hồi!")
+            if os.path.exists(OUT_WAV_FILE):
+                os.remove(OUT_WAV_FILE)
         else:
-            st.error("Không thể kết nối Bucket!!!")
+            st.error("Lỗi!!!")
+    else:
+        st.error("Không thể kết nối Bucket!!!")
 
 
 def main():
@@ -71,7 +70,7 @@ def main():
 
                 if len(audio_array) > 0:
                     # tạo file wav từ audio array
-                    OUT_WAV_FILE = f"{int(time.time())}.wav"
+                    OUT_WAV_FILE = f"./upload/{int(time.time())}.wav"
                     sf.write(OUT_WAV_FILE, audio_array, 44100)
                     waveform, sample_rate = torchaudio.load(OUT_WAV_FILE)
                     os.remove(OUT_WAV_FILE)
