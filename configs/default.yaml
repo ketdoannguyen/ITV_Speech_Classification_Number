@@ -1,8 +1,17 @@
 data:
-  data_csv_dir: "./dataset/speech_data.csv"
-  data_audio_dir: "./dataset/audio"
-  data_augment_dir: "./dataset/augment"
-  data_augment_csv: "./dataset/augment_data.csv"
+  raw_data_dir: "./dataset/raw_data/audio/"
+  raw_data_csv: "./dataset/raw_data/csv_data.csv"
+
+  train_data_dir: "./dataset/train_data/audio/"
+  train_data_csv: "./dataset/train_data/csv_data.csv"
+
+  test_data_dir: "./dataset/test_data/audio/"
+  test_data_csv: "./dataset/test_data/csv_data.csv"
+
+  train_aug_dir: "./dataset/train_aug/audio/"
+  train_aug_csv: "./dataset/train_aug/csv_data.csv"
+
+  vocab_dir: './dataset/vocab_dataset.json'
 
 augment:
   change_speech: [0.8, 1.5]

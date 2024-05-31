@@ -8,10 +8,12 @@ from datasets import load_dataset
 
 
 class WhisperClsDataset(Dataset):
-    def __init__(self, data_csv_dir, feature_extractor):
+    def __init__(self, data_audio_dir, data_csv_dir, vocab_dir, feature_extractor):
         # init
         self.feature_extractor = feature_extractor
+        self.data_audio_dir = data_audio_dir
         self.data_count_number = self.get_data(data_csv_dir)
+        self.vocab_dir = vocab_dir
         self.label2index, self.index2label, self.n_class = self._get_info_label()
         self.data_count_number = self.data_count_number.map(self._process_label)
         self.data_count_number.set_format(type='torch', columns=['label', 'input_features'])
@@ -24,24 +26,17 @@ class WhisperClsDataset(Dataset):
 
 
     def _get_info_label(self):
-        labels = self.data_count_number["train"]["label"]
-        labels = list(dict.fromkeys(labels))
-        label2index = {}
-        index2label = {}
-        for i, label in enumerate(labels):
-            label2index[label] = i
-            index2label[i] = label
-        vocab_dataset = {
-            "label2index": label2index,
-            "index2label": index2label
-        }
-        with open("vocab_dataset.json", "w", encoding='utf-8') as f:
-            json.dump(vocab_dataset, f, ensure_ascii=False, indent=4)
+        with open(self.vocab_dir) as f:
+            vocab = json.load(f)
+            
+        label2index = vocab["label2index"]
+        index2label = vocab["index2label"]
+        
         return label2index, index2label, len(label2index)
 
     def _process_audio(self, batch):
         new_sample_rate = 16000
-        waveform, sample_rate = torchaudio.load("./dataset/" + str(batch["path"]))
+        waveform, sample_rate = torchaudio.load(self.data_audio_dir + str(batch["path"]))
 
         waveform = torchaudio.transforms.Resample(sample_rate, new_sample_rate)(waveform)
         waveform = waveform.squeeze()
@@ -70,8 +65,7 @@ class WhisperClsDataset(Dataset):
 if __name__ == "__main__":
     model_name = "vinai/PhoWhisper-tiny"
     feature_extractor = AutoFeatureExtractor.from_pretrained(model_name)
-    data_dir = "./dataset/count_number.csv"
-    dataset_whisper = WhisperClsDataset(data_dir, feature_extractor)
+    dataset_whisper = WhisperClsDataset("./dataset/test_data/audio/", "./dataset/test_data/csv_data.csv", "./dataset/vocab_dataset.json", feature_extractor)
 
     print(dataset_whisper.data_count_number)
     print(dataset_whisper.data_count_number["train"][[0]])
