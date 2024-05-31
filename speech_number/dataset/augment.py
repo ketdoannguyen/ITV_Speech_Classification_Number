@@ -92,4 +92,4 @@ class AugmentData:
             
         dataFrame = pd.DataFrame(data_row)
 
-        dataFrame.to_csv(config["train_aug_csv"], mode="a", header=False, index=False)
+        dataFrame.to_csv(config["train_aug_csv"], mode="a", header=True, index=False)

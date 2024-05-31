@@ -21,7 +21,7 @@ pip install -r requirements.txt
 
 Chạy lệnh sau để split train set data
 ```
-python main.py split_train_test --config default.yaml test_split 0.2
+python main.py split_train_test --config default.yaml --test_split 0.2
 ```
 
 

@@ -24,13 +24,13 @@ train:
   epoch_num: 30
   train_batch_size: 32
   test_batch_size: 32
-  lr: 0.00005
+  lr: 0.00002
   checkpoint_dir: "./exp/models/best"
   best_checkpoint:
     data_name: "test"
     metric_type: "accuracy"
   early_stopping:
-    patience: 10
+    patience: 5
     data_name: "test"
     loss_type: "loss"
   best_score: 0
