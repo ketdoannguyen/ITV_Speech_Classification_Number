@@ -44,13 +44,6 @@ def handle_feedback(feedback, r, DB, OUT_WAV_FILE, is_click=False):
         # Insert vào bảng
         response = DB.table("feedback-data").insert(insert_data).execute()
         print(f"DB: {response}")
-
-        if response:
-            if os.path.exists(OUT_WAV_FILE):
-                os.remove(OUT_WAV_FILE)
-        else:
-            st.error("Lỗi!!!")
-
     else:
         update_feedback = {
             "feedback": feedback
@@ -85,10 +78,9 @@ def main():
 
                 if len(audio_array) > 0:
                     # tạo file wav từ audio array
-                    OUT_WAV_FILE = f"./upload/{int(time.time())}.wav"
+                    OUT_WAV_FILE = f"{int(time.time())}.wav"
                     sf.write(OUT_WAV_FILE, audio_array, 44100)
                     waveform, sample_rate = torchaudio.load(OUT_WAV_FILE)
-                    os.remove(OUT_WAV_FILE)
 
                     # call api
                     # data to be sent to api
@@ -97,25 +89,22 @@ def main():
                         "sample_rate": sample_rate
                     }
                     url = "http://127.0.0.1:8000/cls_number/infer"
-                    # url = "https://cls-number-nkd.onrender.com/cls_number/infer"
-                    # sending post request and saving response as response object
                     r = requests.post(url=url, json=data)
 
                     # Hiển thị thông báo
-                    print(f"Path khi chưa gửi feedback: {OUT_WAV_FILE}")
-                    print("---------", r)
                     st.success(f"Kết quả dự đoán: {r.json()['label']}")
                     handle_feedback(None, r, DB, OUT_WAV_FILE)
                 else:
                     st.warning("The audio data is empty.")
 
-        st.write("""
-        ### Phản hồi của khách hàng
-        """)
-        feedback = st.text_input("Phản hồi", placeholder="Nhập phản hồi ở đây...")
-        if st.button("Gửi phản hồi"):
-            print(f"Path khi gửi feedback: {OUT_WAV_FILE}")
-            handle_feedback(feedback, r, DB, OUT_WAV_FILE, is_click=True)
+            st.write("""
+            ### Phản hồi của khách hàng
+            """)
+            feedback = st.text_input("Phản hồi", placeholder="Nhập phản hồi ở đây...")
+            if st.button("Gửi phản hồi"):
+                print(f"Path khi gửi feedback: {OUT_WAV_FILE}")
+                handle_feedback(feedback, r, DB, OUT_WAV_FILE, is_click=True)
+            os.remove(OUT_WAV_FILE)
 
 
 if __name__ == "__main__":
