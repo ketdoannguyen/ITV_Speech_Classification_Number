@@ -29,7 +29,7 @@ class WhisperEncoderCustomize(WhisperPreTrainedModel, BaseModel):
         self.matrix_transpose = torch.nn.Linear(1500, 1)
         self.norm = nn.BatchNorm1d(384)
         self.tanh = nn.Tanh()
-        self.dropout = nn.Dropout(0.1)
+        self.dropout = nn.Dropout(0.2)
         self.out_proj = nn.Linear(384, 22)
 
     def forward(self, input_features, labels):

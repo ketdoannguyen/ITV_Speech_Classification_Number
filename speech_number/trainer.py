@@ -25,10 +25,9 @@ class Trainer:
         self.optimizer = AdamW(
             params=self.model.parameters(),
             lr=self.lr,
-            correct_bias=True,
-            weight_decay=1e-5,
+            weight_decay=0.000015,
         )
-        self.scheduler = StepLR(self.optimizer, step_size=2, gamma=0.7)
+        self.scheduler = StepLR(self.optimizer, step_size=1, gamma=0.9)
 
         # set data info
         self.data_train = data_train
@@ -67,7 +66,7 @@ class Trainer:
         assert best_checkpoint is not None, "'best_checkpoint' must be not None"
 
         if early_stopping is not None:
-            last_loss = 999999
+            last_loss = 9999
             trigger_times = 0
 
         for epoch in range(1, self.epoch_num + 1):
@@ -104,7 +103,7 @@ class Trainer:
                     early_stopping["loss_type"]
                 ]
 
-                if current_loss > last_loss:
+                if current_loss > last_loss - 0.1 and epoch > 5:
                     trigger_times += 1
 
                 last_loss = current_loss

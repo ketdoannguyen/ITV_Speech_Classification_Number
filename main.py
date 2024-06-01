@@ -99,19 +99,20 @@ def train(config, outfile, is_aug):
     best_score = config["train"]["best_score"]
     checkpoint_dir = config["train"]["checkpoint_dir"]
     n_train = config["train"]["n_train"]
-    seeds = [config["train"]["seed_best"]] + [random.randint(0, 1000) for _ in range(n_train-1)]
+    seeds = [config["train"]["best_seed"]] + [random.randint(0, 1000) for _ in range(n_train-1)]
+    best_seed = seeds[0]
     for train_time in range(n_train):
         score = train_(best_score, seeds[train_time], is_aug)
         if score > best_score:
             best_score = score
-            seed = seeds[train_time]
+            best_seed = seeds[train_time]
 
-    config["train"]["seed_best"] = seed
-    config["train"]["best_score"] = best_score
-    with open(config_path, 'w') as file:
-        yaml.dump(config, file, default_flow_style=False)
+        config["train"]["best_seed"] = best_seed
+        config["train"]["best_score"] = best_score
+        with open(config_path, 'w') as file:
+            yaml.dump(config, file, default_flow_style=False)
 
-    print(f"Điểm tốt nhất {best_score} tại seed {seed}")
+    print(f"Điểm tốt nhất {best_score} tại seed {best_seed}")
 
 
 @root.command("serve")

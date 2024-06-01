@@ -34,7 +34,7 @@ train:
     data_name: "test"
     loss_type: "loss"
   best_score: 0
-  seed_best: 0
+  best_seed: 0
 
 service:
   checkpoint_dir: "./exp/models/best"
