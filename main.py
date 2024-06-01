@@ -78,7 +78,7 @@ def main():
 
                 if len(audio_array) > 0:
                     # tạo file wav từ audio array
-                    OUT_WAV_FILE = f"{int(time.time())}.wav"
+                    OUT_WAV_FILE = f"cache.wav"
                     sf.write(OUT_WAV_FILE, audio_array, 44100)
                     waveform, sample_rate = torchaudio.load(OUT_WAV_FILE)
 
@@ -94,6 +94,7 @@ def main():
                     # Hiển thị thông báo
                     st.success(f"Kết quả dự đoán: {r.json()['label']}")
                     handle_feedback(None, r, DB, OUT_WAV_FILE)
+                    os.remove(OUT_WAV_FILE)
                 else:
                     st.warning("The audio data is empty.")
 
@@ -104,7 +105,6 @@ def main():
             if st.button("Gửi phản hồi"):
                 print(f"Path khi gửi feedback: {OUT_WAV_FILE}")
                 handle_feedback(feedback, r, DB, OUT_WAV_FILE, is_click=True)
-            os.remove(OUT_WAV_FILE)
 
 
 if __name__ == "__main__":
