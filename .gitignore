@@ -4,3 +4,5 @@
 /dataset/train_data
 /dataset/train_aug
 /dataset/dataset.zip
+**/__pycache__
+*/*.pyc
