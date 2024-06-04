@@ -14,7 +14,7 @@
 - Chạy câu lệnh để run server
 ``` python .\main.py serve ```
 - Chạy câu lệnh để checkout qua branch ui
-``` git checkout main ```
+``` git checkout ui ```
 - Chạy câu lệnh để run UI
 ``` streamlit run main.py ```
 - host ngrok
