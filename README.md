@@ -9,10 +9,16 @@
 3. `pip install -r requirements.txt`
 
 ## Run
+- Chạy câu lệnh để checkout qua main
+``` git checkout main ```
+- Chạy câu lệnh để run server
+``` python .\main.py serve ```
+- Chạy câu lệnh để checkout qua branch ui
+``` git checkout main ```
 - Chạy câu lệnh để run UI
-```streamlit run main.py```
+``` streamlit run main.py ```
 - host ngrok
-```ngrok http http://localhost:8501```
+``` ngrok http http://localhost:8501 ```
 
 
 
