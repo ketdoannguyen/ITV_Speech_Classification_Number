@@ -119,9 +119,6 @@ def main():
             handle_feedback(feedback, r, OUT_WAV_FILE, is_click=True)
             st.session_state['predict'] = False
 
-    else:
-        st.warning("Vui lòng ghi âm trước khi dự đoán!")
-
 
 if __name__ == "__main__":
     st.set_page_config(page_title="Predict Numbers")
