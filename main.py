@@ -1,5 +1,8 @@
+import json
 import os
 import random
+import numpy as np
+import torch
 import yaml
 import click
 
@@ -20,15 +23,23 @@ def train(config, outfile, is_aug):
     
     # load config
     config_path = "./configs/" + config
+    outfile_path = outfile
     outfile = "./log_output/" + outfile
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
     outfile = open(outfile, "w")
 
-    def train_(best_score, seed, is_aug):
+    def train_(outfile_path, best_score, seed, is_aug):
         # save config
         os.makedirs(checkpoint_dir, exist_ok=True)
+
+        # set seed
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        np.random.seed(seed)
+        random.seed(seed)
 
         model = WhisperEncoderCustomize.from_pretrained(config["train"]["pre_trained_model"])
         feature_extractor = WhisperFeatureExtractor.from_pretrained(config["train"]["pre_trained_model"])
@@ -58,16 +69,23 @@ def train(config, outfile, is_aug):
             
             data_train = ConcatDataset([data_train, data_aug])
         
-        data_test = WhisperClsDataset(
-            data_audio_dir=config["data"]["test_data_dir"],
-            data_csv_dir=config["data"]["test_data_csv"],
+        # data_test_in = WhisperClsDataset(
+        #     data_audio_dir=config["data"]["test_in_data_dir"],
+        #     data_csv_dir=config["data"]["test_in_data_csv"],
+        #     vocab_dir=config["data"]["vocab_dir"],
+        #     feature_extractor=feature_extractor
+        # )
+
+        data_test_out = WhisperClsDataset(
+            data_audio_dir=config["data"]["test_out_data_dir"],
+            data_csv_dir=config["data"]["test_out_data_csv"],
             vocab_dir=config["data"]["vocab_dir"],
             feature_extractor=feature_extractor
         )
 
         data_tests = {
             "train": data_train,
-            "test": data_test
+            "test_out": data_test_out
         }
 
         # setup trainer
@@ -76,18 +94,18 @@ def train(config, outfile, is_aug):
             train_batch_size=config["train"]["train_batch_size"],
             test_batch_size=config["train"]["test_batch_size"],
             lr=config["train"]["lr"],
-            outfile=outfile
+            outfile=outfile,
+            seed = seed
         )
         trainer.setup(
             model=model,
             data_train=data_train,
             data_tests=data_tests,
-            seed=seed
         )
 
         # start training
         best_score = trainer.train(
-            seed = seed,
+            name_version=outfile_path,
             checkpoint_dir=checkpoint_dir,
             best_checkpoint=config["train"]["best_checkpoint"],
             early_stopping=config["train"]["early_stopping"],
@@ -96,19 +114,28 @@ def train(config, outfile, is_aug):
 
         return best_score
 
-    best_score = config["train"]["best_score"]
+    model_pretrain = config['train']['pre_trained_model']
+    best_score = config["train"]["best_score"][model_pretrain]
     checkpoint_dir = config["train"]["checkpoint_dir"]
     n_train = config["train"]["n_train"]
-    seeds = [config["train"]["best_seed"]] + [random.randint(0, 1000) for _ in range(n_train-1)]
+    seeds = [config["train"]["best_seed"][model_pretrain]] + [random.randint(0, 1000) for _ in range(n_train-1)]
     best_seed = seeds[0]
+
+    print("-"*35 + " CONFIG " +"-"*35 + "\n", file=outfile)
+    print(json.dumps(config, indent=4), file=outfile)
+
     for train_time in range(n_train):
-        score = train_(best_score, seeds[train_time], is_aug)
+        print("\n\n" + "-"*80, file=outfile)
+        print(f"\nTRAINING MODEL {model_pretrain} - SEED {seeds[train_time]}\n", file=outfile)
+        print("-"*80 + "\n\n", file=outfile)
+
+        score = train_(outfile_path[:-4].replace("_", " "), best_score, seeds[train_time], is_aug)
         if score > best_score:
             best_score = score
             best_seed = seeds[train_time]
 
-        config["train"]["best_seed"] = best_seed
-        config["train"]["best_score"] = best_score
+        config["train"]["best_seed"][model_pretrain] = best_seed
+        config["train"]["best_score"][model_pretrain] = best_score
         with open(config_path, 'w') as file:
             yaml.dump(config, file, default_flow_style=False)
 

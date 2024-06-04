@@ -19,7 +19,7 @@ class WhisperClsDataset(Dataset):
         self.data_count_number.set_format(type='torch', columns=['label', 'input_features'])
 
     def get_data(self, data_csv_dir):
-        data_count_number = load_dataset("csv", data_files=data_csv_dir)
+        data_count_number = load_dataset("csv", data_files=data_csv_dir, cache_dir=None)
         data_count_number = data_count_number.map(self._process_audio)
 
         return data_count_number
@@ -38,8 +38,11 @@ class WhisperClsDataset(Dataset):
         new_sample_rate = 16000
         waveform, sample_rate = torchaudio.load(self.data_audio_dir + str(batch["path"]))
 
+        waveform = waveform * 3
+
         waveform = torchaudio.transforms.Resample(sample_rate, new_sample_rate)(waveform)
         waveform = waveform.squeeze()
+        
         batch["input_features"] = self.feature_extractor(waveform, sampling_rate=new_sample_rate, return_tensors="pt").input_features.squeeze(0)
         return batch
 

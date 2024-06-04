@@ -27,10 +27,10 @@ class WhisperEncoderCustomize(WhisperPreTrainedModel, BaseModel):
         super().__init__(config)
         self.encoder = WhisperEncoder(config)
         self.matrix_transpose = torch.nn.Linear(1500, 1)
-        self.norm = nn.BatchNorm1d(384)
+        self.norm = nn.BatchNorm1d(512)
         self.tanh = nn.Tanh()
         self.dropout = nn.Dropout(0.2)
-        self.out_proj = nn.Linear(384, 22)
+        self.out_proj = nn.Linear(512, 22)
 
     def forward(self, input_features, labels):
         # Whisper encoder
@@ -72,7 +72,7 @@ class WhisperEncoderCustomize(WhisperPreTrainedModel, BaseModel):
             param.requires_grad = True
 
     def pre_epoch(self, trainer, epoch):
-        if epoch < 8:
+        if epoch <= 3:
             self.freeze_encoder()
         else:
             self.unfreeze_encoder()

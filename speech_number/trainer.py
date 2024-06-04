@@ -1,3 +1,5 @@
+import random
+import numpy as np
 import wandb
 import torch
 import os
@@ -7,16 +9,17 @@ from torch.utils.data import DataLoader
 
 
 class Trainer:
-    def __init__(self, epoch_num, train_batch_size, test_batch_size, lr, outfile):
+    def __init__(self, epoch_num, train_batch_size, test_batch_size, lr, outfile, seed):
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
+        self.seed = seed
         self.epoch_num = epoch_num
         self.train_batch_size = train_batch_size
         self.test_batch_size = test_batch_size
         self.lr = lr
         self.outfile = outfile
 
-    def setup(self, model, data_train, data_tests, seed):
-        torch.manual_seed(seed)
+    def setup(self, model, data_train, data_tests):
+        self.set_seed(self.seed)
         self.model = model
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
@@ -53,15 +56,15 @@ class Trainer:
 
     def train(
         self,
-        seed=None,
+        name_version=None,
         early_stopping=None,
         best_checkpoint=None,
         best_score=None,
         checkpoint_dir=None
     ):
-        wandb.init(project="[ITV] Count Number", name=f"Test version 1 seed {seed}")
+        wandb.init(project="[ITV] Count Number", name=f"Test {name_version} seed {self.seed}")
         os.makedirs(checkpoint_dir, exist_ok=True)
-
+        self.set_seed(self.seed)
         # best checkpoint params
         assert best_checkpoint is not None, "'best_checkpoint' must be not None"
 
@@ -103,7 +106,7 @@ class Trainer:
                     early_stopping["loss_type"]
                 ]
 
-                if current_loss > last_loss - 0.1 and epoch > 5:
+                if current_loss > last_loss and epoch > 5:
                     trigger_times += 1
 
                 last_loss = current_loss
@@ -129,3 +132,10 @@ class Trainer:
         wandb_log[f"{data_name}/epoch"] = epoch
         wandb.log(wandb_log)
         return log_info
+    
+    def set_seed(self, seed):
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        np.random.seed(seed)
+        random.seed(seed)

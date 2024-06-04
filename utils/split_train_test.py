@@ -7,7 +7,6 @@ import yaml
 
 def _split_csv(raw_data_csv, test_split: float):
     df_all = pd.read_csv(raw_data_csv)
-    print(len(df_all))
     label_values = list(set(df_all['label'].tolist()))
     num_samples_test = round(test_split * len(df_all))
     df_test = []
@@ -37,7 +36,7 @@ def split_train_test(config, test_split):
     
     folder_raw = config["data"]["raw_data_dir"]
     folder_train = config["data"]["train_data_dir"]
-    folder_test = config["data"]["test_data_dir"]
+    folder_test = config["data"]["test_in_data_dir"]
     
     _remove_file_in_folder(folder_train)
     _remove_file_in_folder(folder_test)
@@ -51,7 +50,88 @@ def split_train_test(config, test_split):
     print("Thành công")
     print(df_train['label'].value_counts())
     print(df_test['label'].value_counts())
+
+def split_train_test_many_set(config, test_split):
+    df_train1, df_test_in = _split_csv(config["data"]["raw_data1_csv"], test_split=test_split)
+    df_train2, df_test_out = _split_csv(config["data"]["raw_data2_csv"], test_split=test_split)
     
+    folder_raw1 = config["data"]["raw_data1_dir"]
+    folder_raw2 = config["data"]["raw_data2_dir"]
+    folder_train = config["data"]["train_data_dir"]
+    folder_test_in = config["data"]["test_in_data_dir"]
+    folder_test_out = config["data"]["test_out_data_dir"]
+    
+    _remove_file_in_folder(folder_train)
+    _remove_file_in_folder(folder_test_in)
+    _remove_file_in_folder(folder_test_out)
+    
+    _copy_file(df_train1, folder_raw1, folder_train)
+    _copy_file(df_test_in, folder_raw1, folder_test_in)
+        
+    _copy_file(df_train2, folder_raw2, folder_train)
+    _copy_file(df_test_out, folder_raw2, folder_test_out)
+
+    df_train = pd.concat([df_train1, df_train2], axis=0, ignore_index=True)
+
+    df_train.to_csv(config["data"]["train_data_csv"], index=False)
+    df_test_in.to_csv(config["data"]["test_in_data_csv"], index=False)
+    df_test_out.to_csv(config["data"]["test_out_data_csv"], index=False)
+    
+    print("Thành công")
+    print(df_train['label'].value_counts())
+    print(df_test_in['label'].value_counts())
+    print(df_test_out['label'].value_counts())
+    
+def split_train_test_many_set_1_test(config, test_split):
+    df_train1 = pd.read_csv(config["data"]["raw_data1_csv"])
+    df_train2, df_test_out = _split_csv(config["data"]["raw_data2_csv"], test_split=0.5)
+    
+    folder_raw1 = config["data"]["raw_data1_dir"]
+    folder_raw2 = config["data"]["raw_data2_dir"]
+    folder_train = config["data"]["train_data_dir"]
+    folder_test_out = config["data"]["test_out_data_dir"]
+    
+    _remove_file_in_folder(folder_train)
+    _remove_file_in_folder(folder_test_out)
+    
+    _copy_file(df_train1, folder_raw1, folder_train)
+    _copy_file(df_train2, folder_raw2, folder_train)
+    _copy_file(df_test_out, folder_raw2, folder_test_out)
+
+    df_train = pd.concat([df_train1, df_train2], axis=0, ignore_index=True)
+
+    df_train.to_csv(config["data"]["train_data_csv"], index=False)
+    df_test_out.to_csv(config["data"]["test_out_data_csv"], index=False)
+    
+    print("Thành công")
+    print(len(df_train))
+    print(len(df_test_out))
+    print(df_train['label'].value_counts())
+    print(df_test_out['label'].value_counts())
+
+def split_train_test_many_set_full_test_2nd(config, test_split):
+    df_train = pd.read_csv(config["data"]["raw_data1_csv"])
+    df_test = pd.read_csv(config["data"]["raw_data2_csv"])
+    
+    folder_raw1 = config["data"]["raw_data1_dir"]
+    folder_raw2 = config["data"]["raw_data2_dir"]
+    folder_train = config["data"]["train_data_dir"]
+    folder_test_out = config["data"]["test_out_data_dir"]
+    
+    _remove_file_in_folder(folder_train)
+    _remove_file_in_folder(folder_test_out)
+    
+    _copy_file(df_train, folder_raw1, folder_train)
+    _copy_file(df_test, folder_raw2, folder_test_out)
+
+    df_train.to_csv(config["data"]["train_data_csv"], index=False)
+    df_test.to_csv(config["data"]["test_out_data_csv"], index=False)
+    
+    print("Thành công")
+    print(len(df_train))
+    print(len(df_test))
+    print(df_train['label'].value_counts())
+    print(df_test['label'].value_counts())
 
 def _remove_file_in_folder(folder_path):
     if os.path.exists(folder_path):
@@ -74,13 +154,6 @@ if __name__ == "__main__":
         config = yaml.safe_load(f)
     
 
-    train, test = split_train_test(config, 0.2)
-    
-    train_c = train['label'].value_counts()
-    test_c = test['label'].value_counts()
-    
-    print(train_c)
-    
-    print(test_c)
+    split_train_test_many_set_1_test(config, 0.2)
     
     

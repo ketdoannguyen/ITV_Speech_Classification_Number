@@ -1,8 +1,10 @@
 import librosa
+import numpy as np
 import soundfile as sf
 import os
 import random
 import pandas as pd
+from tqdm import tqdm
 
 class AugmentData:
     def __init__(self, input_dir, output_dir) -> None:
@@ -20,7 +22,7 @@ class AugmentData:
             file_path = os.path.join(folder_path, file_name)
             os.remove(file_path)
             
-    def change_speech(self, input_file: str, sample_rate: int, speed_factor: float, type: int):
+    def change_speech(self, input_file: str, sample_rate: int, speed_factor: float):
         """
         0 < speed_factor < 1: tốc độ chậm
         speed_factor = 1: mặc định
@@ -30,13 +32,14 @@ class AugmentData:
         audio, _ = librosa.load(os.path.join(self.input_dir, input_file), sr=sample_rate)
 
         audio_changed = librosa.effects.time_stretch(audio, rate=speed_factor)
+        name_audio_aug = f"aug_speech_{str(speed_factor).replace('.', '_')}_{input_file}"
 
-        output_path = os.path.join(self.output_dir, f"aug_speech_{type}_{input_file}")
+        output_path = os.path.join(self.output_dir, name_audio_aug)
         sf.write(output_path, audio_changed, sample_rate)
 
-        return f"aug_speech_{type}_{input_file}"
+        return name_audio_aug
     
-    def change_pitch(self, input_file: str, sample_rate: int, n_steps: float, type: int):
+    def change_pitch(self, input_file: str, sample_rate: int, n_steps: float):
         """
         n_steps < 0: giảm cao độ
         n_steps: 0 là mặc định
@@ -45,12 +48,14 @@ class AugmentData:
         audio, _ = librosa.load(os.path.join(self.input_dir, input_file), sr=sample_rate)
         
         audio_changed = librosa.effects.pitch_shift(audio, sr=sample_rate, n_steps=n_steps)
-        
-        output_path = os.path.join(self.output_dir, f"aug_pitch_{type}_{input_file}")
+
+        name_audio_aug = f"aug_pitch_{str(n_steps).replace('.', '_')}_{input_file}"
+
+        output_path = os.path.join(self.output_dir, name_audio_aug)
         sf.write(output_path, audio_changed, sample_rate)
-        return f"aug_pitch_{type}_{input_file}"
+        return name_audio_aug
     
-    def change_volume(self, input_file: str, sample_rate: int, gain: float, type: int):
+    def change_volume(self, input_file: str, sample_rate: int, gain: float):
         """
         gain dùng để điều chỉnh to nhỏ với:
             0: Là không nghe gì cả
@@ -62,34 +67,41 @@ class AugmentData:
 
         gain_audio = audio * gain
 
-        output_path = os.path.join(self.output_dir, f"aug_volume_{type}_{input_file}")
+        name_audio_aug = f"aug_volume_{str(gain).replace('.', '_')}_{input_file}"
+        output_path = os.path.join(self.output_dir, name_audio_aug)
         sf.write(output_path, gain_audio, sample_rate)
     
-        return f"aug_volume_{type}_{input_file}"
+        return name_audio_aug
 
     def run(self, config: dict = None):
-        functions = ["change_speech", "change_pitch", "change_volume"]
+        # set seed
+        seed = 0
+        np.random.seed(seed)
+        random.seed(seed)
+
+        functions = ["change_speech", "change_volume", "change_pitch"] #"change_pitch", 
 
         df = pd.read_csv(config["train_data_csv"])
 
         data_row = [] 
-        for _, row in df.iterrows():
+        for _, row in tqdm(df.iterrows()):
             
-            loop = random.randint(1, len(functions))
+            loop = random.randint(2, len(functions))
 
             random_functions = random.sample(functions, loop)
 
             for func in random_functions:
-                choose = random.randint(0, 1)
+                chooses = random.sample(range(0, len(config[func])), random.randint(1, len(config[func])))
                 method = getattr(self, func)
-                file_name = method(row['path'], 16000, config[func][choose], choose)
+                for choose in chooses:
+                    file_name = method(row['path'], 16000, config[func][choose])
 
-                data_row.append({
-                    "id": file_name[:-4],
-                    "path": file_name,
-                    "label": row["label"]
-                })
+                    data_row.append({
+                        "id": file_name[:-4],
+                        "path": file_name,
+                        "label": row["label"]
+                    })
             
         dataFrame = pd.DataFrame(data_row)
-
-        dataFrame.to_csv(config["train_aug_csv"], mode="a", header=True, index=False)
+        print(len(dataFrame))
+        dataFrame.to_csv(config["train_aug_csv"], mode="w", header=True, index=False)
