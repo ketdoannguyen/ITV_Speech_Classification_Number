@@ -97,11 +97,12 @@ def main():
                 "sample_rate": sample_rate
             }
 
+            time_start = time.time()
             url = "http://127.0.0.1:8000/cls_number/infer"
             r = requests.post(url=url, json=data)
 
             # Hiển thị thông báo
-            st.success(f"Kết quả dự đoán: {r.json()['label']}")
+            st.success(f"Kết quả dự đoán: {r.json()['label']}. Chạy trong {time.time() - time_start}")
             print(r.json())
             handle_feedback(None, r, OUT_WAV_FILE, is_click=False)
             if os.path.exists(OUT_WAV_FILE):
