@@ -107,7 +107,7 @@ def main():
             if os.path.exists(OUT_WAV_FILE):
                 os.remove(OUT_WAV_FILE)
         else:
-            st.warning("Vui lòng ghi âm!")
+            st.warning("Bản ghi bị lỗi hãy thử lại!")
 
         st.write("""
         ### Phản hồi của khách hàng
@@ -117,6 +117,9 @@ def main():
             print(f"Path khi gửi feedback: {OUT_WAV_FILE}")
             handle_feedback(feedback, r, OUT_WAV_FILE, is_click=True)
             st.session_state['predict'] = False
+
+    else:
+        st.warning("Vui lòng ghi âm trước khi dự đoán!")
 
 
 if __name__ == "__main__":
