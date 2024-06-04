@@ -104,7 +104,7 @@ def main():
             st.success(f"Kết quả dự đoán: {r.json()['label']}")
             print(r.json())
             handle_feedback(None, r, OUT_WAV_FILE, is_click=False)
-            # os.remove(OUT_WAV_FILE)
+            os.remove(OUT_WAV_FILE)
         else:
             st.warning("Vui lòng ghi âm!")
 
