@@ -4,12 +4,4 @@
 /dataset/train_data
 /dataset/train_aug
 /dataset/test_out_data
-*/__pycache__
-speech_number/dataset/__pycache__/dataset_cls.cpython-310.pyc
-speech_number/service/__pycache__/service_class.cpython-310.pyc
-speech_number/service/__pycache__/service_predict.cpython-310.pyc
-exp/
 log_output/
-speech_number/dataset/__pycache__/augment.cpython-310.pyc
-speech_number/service/__pycache__/service_predict.cpython-310.pyc
-speech_number/service/__pycache__/service_class.cpython-310.pyc
