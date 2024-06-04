@@ -26,24 +26,27 @@ def colorize(value):
 def handle_feedback(feedback, r, DB, OUT_WAV_FILE, is_click=False):
     global wav_url
     if not is_click:
+        try:
         # Lưu trữ file wav vào bucket
-        bucket_res = DB.storage.from_("data-feedback").upload(file=OUT_WAV_FILE, path=f"{OUT_WAV_FILE}",
-                                                              file_options={"content-type": "audio/wav"})
-        print(f"Bucket: {bucket_res}")
+            bucket_res = DB.storage.from_("data-feedback").upload(file=OUT_WAV_FILE, path=f"{OUT_WAV_FILE}",
+                                                                file_options={"content-type": "audio/wav"})
+            print(f"Bucket: {bucket_res}")
 
-        # Lấy file wav url
-        wav_url = DB.storage.from_("data-feedback").get_public_url(path=OUT_WAV_FILE)
-        wav_url = wav_url[:-1]  # Xóa ký tự cuối "?"
+            # Lấy file wav url
+            wav_url = DB.storage.from_("data-feedback").get_public_url(path=OUT_WAV_FILE)
+            wav_url = wav_url[:-1]  # Xóa ký tự cuối "?"
 
-        print(f"Wav url: {wav_url}")
+            print(f"Wav url: {wav_url}")
 
-        insert_data = {
-            "audio_url": wav_url, "label_predicted": r.json().get('label'), "feedback": None
-        }
+            insert_data = {
+                "audio_url": wav_url, "label_predicted": r.json().get('label'), "feedback": None
+            }
 
-        # Insert vào bảng
-        response = DB.table("feedback-data").insert(insert_data).execute()
-        print(f"DB: {response}")
+            # Insert vào bảng
+            response = DB.table("feedback-data").insert(insert_data).execute()
+            print(f"DB: {response}")
+        except:
+            print("------BUG")
     else:
         update_feedback = {
             "feedback": feedback
