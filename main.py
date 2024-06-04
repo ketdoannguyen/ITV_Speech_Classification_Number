@@ -27,9 +27,9 @@ def handle_feedback(feedback, r, DB, OUT_WAV_FILE, is_click=False):
     global wav_url
     if not is_click:
         try:
-        # Lưu trữ file wav vào bucket
+            # Lưu trữ file wav vào bucket
             bucket_res = DB.storage.from_("data-feedback").upload(file=OUT_WAV_FILE, path=f"{OUT_WAV_FILE}",
-                                                                file_options={"content-type": "audio/wav"})
+                                                                  file_options={"content-type": "audio/wav"})
             print(f"Bucket: {bucket_res}")
 
             # Lấy file wav url
@@ -81,7 +81,7 @@ def main():
 
                 if len(audio_array) > 0:
                     # tạo file wav từ audio array
-                    OUT_WAV_FILE = f"cache.wav"
+                    OUT_WAV_FILE = f"./upload/record{int(time.time())}.wav"
                     sf.write(OUT_WAV_FILE, audio_array, 44100)
                     waveform, sample_rate = torchaudio.load(OUT_WAV_FILE)
 
@@ -91,6 +91,7 @@ def main():
                         "input_audio": waveform.tolist(),
                         "sample_rate": sample_rate
                     }
+
                     url = "http://127.0.0.1:8000/cls_number/infer"
                     r = requests.post(url=url, json=data)
 
