@@ -15,6 +15,7 @@ class ClsNumber():
         self.model = WhisperEncoderCustomize.from_pretrained(checkpoint_dir)
         self.feature_extractor = WhisperFeatureExtractor.from_pretrained("vinai/PhoWhisper-tiny")
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cpu")
         self.model.to(self.device)
         self.model.eval()
         self.index2label = self.load_vocab()

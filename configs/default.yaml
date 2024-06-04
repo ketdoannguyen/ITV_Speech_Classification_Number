@@ -25,7 +25,7 @@ data:
   train_data_dir: ./dataset/train_data/audio/
   vocab_dir: ./dataset/vocab_dataset.json
 service:
-  checkpoint_dir: ./exp/models/model_best/best
+  checkpoint_dir: ./exp/models/best/best
 train:
   best_checkpoint:
     data_name: train
