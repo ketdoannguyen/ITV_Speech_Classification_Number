@@ -2,16 +2,13 @@ import streamlit as st
 import numpy as np
 import soundfile as sf
 import time
+
+from multidict import istr
 from st_audiorec import st_audiorec
 import os
 import torchaudio
 import requests
 from supabase import create_client, Client
-
-# init DB
-url: str = "https://yyciwuqbkcqecbrqholh.supabase.co"
-key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5Y2l3dXFia2NxZWNicnFob2xoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxNjI5NTEwNSwiZXhwIjoyMDMxODcxMTA1fQ.5mRyn4e7g1PKBnh2N6g10ISkp7CvQnX2owbWQLe9lnQ"
-DB: Client = create_client(supabase_url=url, supabase_key=key)
 
 
 def colorize(value):
@@ -23,8 +20,12 @@ def colorize(value):
         return ""
 
 
-def handle_feedback(feedback, r, DB, OUT_WAV_FILE, is_click=False):
-    global wav_url
+def handle_feedback(feedback, r, OUT_WAV_FILE, is_click=False):
+    # init DB
+    url: str = "https://yyciwuqbkcqecbrqholh.supabase.co"
+    key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5Y2l3dXFia2NxZWNicnFob2xoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxNjI5NTEwNSwiZXhwIjoyMDMxODcxMTA1fQ.5mRyn4e7g1PKBnh2N6g10ISkp7CvQnX2owbWQLe9lnQ"
+    DB: Client = create_client(supabase_url=url, supabase_key=key)
+
     if not is_click:
         try:
             # Lưu trữ file wav vào bucket
@@ -36,7 +37,7 @@ def handle_feedback(feedback, r, DB, OUT_WAV_FILE, is_click=False):
             wav_url = DB.storage.from_("data-feedback").get_public_url(path=OUT_WAV_FILE)
             wav_url = wav_url[:-1]  # Xóa ký tự cuối "?"
 
-            print(f"Wav url: {wav_url}")
+            print(f"Wav url for insert: {wav_url}")
 
             insert_data = {
                 "audio_url": wav_url, "label_predicted": r.json().get('label'), "feedback": None
@@ -52,8 +53,13 @@ def handle_feedback(feedback, r, DB, OUT_WAV_FILE, is_click=False):
             "feedback": feedback
         }
 
+        wav_url = DB.storage.from_("data-feedback").get_public_url(path=OUT_WAV_FILE)
+        wav_url = wav_url[:-1]  # Xóa ký tự cuối "?"
+
+        print(f"Wav url for update: {wav_url}")
+
         # Update bảng theo file wav url
-        response = DB.table("speech-data").update(update_feedback).eq('audio_url', wav_url).execute()
+        response = DB.table("feedback-data").update(update_feedback).eq('audio_url', wav_url).execute()
         print(f"DB: {response}")
 
         if response:
@@ -63,55 +69,56 @@ def handle_feedback(feedback, r, DB, OUT_WAV_FILE, is_click=False):
 
 
 def main():
-    global OUT_WAV_FILE
-    _, cl1, _ = st.columns([4, 5, 4])
+    st.markdown("<h1>Nhận diện đếm số</h1>", unsafe_allow_html=True)
 
-    # UI
-    with cl1:
-        st.markdown("<h1>Nhận diện đếm số</h1>", unsafe_allow_html=True)
+    # UI Audio
+    wav_audio_data = st_audiorec()
 
-        # UI Audio
-        wav_audio_data = st_audiorec()
+    predict_button = st.button('Dự đoán')
 
-        # handle click button
-        if st.button("Dự đoán") and wav_audio_data:
-            with st.spinner('Đợi trong giây lát...'):
-                # Convert audio_bytes to a NumPy array
-                audio_array = np.frombuffer(wav_audio_data, dtype=np.int32)
+    if not st.session_state.get('predict'):
+        st.session_state['predict'] = predict_button
 
-                if len(audio_array) > 0:
-                    # tạo file wav từ audio array
-                    OUT_WAV_FILE = f"./upload/record{int(time.time())}.wav"
-                    sf.write(OUT_WAV_FILE, audio_array, 44100)
-                    waveform, sample_rate = torchaudio.load(OUT_WAV_FILE)
+    # handle click button
+    if st.session_state['predict'] and wav_audio_data:
+        # Convert audio_bytes to a NumPy array
+        audio_array = np.frombuffer(wav_audio_data, dtype=np.int32)
 
-                    # call api
-                    # data to be sent to api
-                    data = {
-                        "input_audio": waveform.tolist(),
-                        "sample_rate": sample_rate
-                    }
+        if len(audio_array) > 0:
+            # tạo file wav từ audio array
+            OUT_WAV_FILE = f"./upload/record{int(time.time())}.wav"
+            sf.write(OUT_WAV_FILE, audio_array, 44100)
+            waveform, sample_rate = torchaudio.load(OUT_WAV_FILE)
 
-                    url = "http://127.0.0.1:8000/cls_number/infer"
-                    r = requests.post(url=url, json=data)
+            # call api
+            # data to be sent to api
+            data = {
+                "input_audio": waveform.tolist(),
+                "sample_rate": sample_rate
+            }
 
-                    # Hiển thị thông báo
-                    st.success(f"Kết quả dự đoán: {r.json()['label']}")
-                    handle_feedback(None, r, DB, OUT_WAV_FILE)
-                    os.remove(OUT_WAV_FILE)
-                else:
-                    st.warning("The audio data is empty.")
+            url = "http://127.0.0.1:8000/cls_number/infer"
+            r = requests.post(url=url, json=data)
 
-            st.write("""
-            ### Phản hồi của khách hàng
-            """)
-            feedback = st.text_input("Phản hồi", placeholder="Nhập phản hồi ở đây...")
-            if st.button("Gửi phản hồi"):
-                print(f"Path khi gửi feedback: {OUT_WAV_FILE}")
-                handle_feedback(feedback, r, DB, OUT_WAV_FILE, is_click=True)
+            # Hiển thị thông báo
+            st.success(f"Kết quả dự đoán: {r.json()['label']}")
+            print(r.json())
+            handle_feedback(None, r, OUT_WAV_FILE, is_click=False)
+            # os.remove(OUT_WAV_FILE)
+        else:
+            st.warning("Vui lòng ghi âm!")
+
+        st.write("""
+        ### Phản hồi của khách hàng
+        """)
+        feedback = st.text_input("Phản hồi", placeholder="Nhập phản hồi ở đây...")
+        if st.button("Gửi phản hồi"):
+            print(f"Path khi gửi feedback: {OUT_WAV_FILE}")
+            handle_feedback(feedback, r, OUT_WAV_FILE, is_click=True)
+            st.session_state['predict'] = False
 
 
 if __name__ == "__main__":
-    st.set_page_config(page_title="Predict Numbers", layout="wide")
+    st.set_page_config(page_title="Predict Numbers")
 
     main()
