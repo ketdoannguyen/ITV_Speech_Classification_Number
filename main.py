@@ -81,11 +81,11 @@ class FishWeightApp:
     def get_id(self):
         audio = pyaudio.PyAudio()
         stream = audio.open(format=pyaudio.paInt16, channels=1, rate=44100, input=True, frames_per_buffer=1024)
-        frames = []
+        frame = []
 
         while self.recording:
             data = stream.read(1024)
-            frames.append(data)
+            frame.append(data)
 
         stream.stop_stream()
         stream.close()
@@ -99,10 +99,10 @@ class FishWeightApp:
         sound_file.setnchannels(1)
         sound_file.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
         sound_file.setframerate(44100)
-        sound_file.writeframes(b"".join(frames))
+        sound_file.writeframes(b"".join(frame))
         sound_file.close()
 
-        numbers = send_audio(frames)
+        numbers = send_audio(frame, file_path_save)
         # print(f"Result: {numbers}")
 
         return numbers
