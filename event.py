@@ -1,5 +1,5 @@
 import random
-import speech_recognition as sr
+import numpy as np
 
 
 def get_fish_slices():
@@ -7,24 +7,23 @@ def get_fish_slices():
     return random.randint(0, 20)  # Giá trị mẫu
 
 
-def get_id_user_from_voice():
-    recognizer = sr.Recognizer()
-    microphone = sr.Microphone()
-    with microphone as source:
-        recognizer.adjust_for_ambient_noise(source)
-        try:
-            audio = recognizer.listen(source, timeout=2)  # Lắng nghe tối đa 2 giây
-        except sr.WaitTimeoutError:
-            print("Hết thời gian lắng nghe.")
-            return "Hết thời gian"
+def send_audio(frames):
+    audio_data = b''.join(frames)
+    audio_array = np.frombuffer(audio_data, dtype=np.int16)
 
-    try:
-        id_user = recognizer.recognize_google(audio, language='vi-VN')
-        print(f"ID người dùng: {id_user}")
-        return id_user
-    except sr.UnknownValueError:
-        print("Không thể nhận diện.")
-        return "Unknown"
-    except sr.RequestError as e:
-        print(f"Lỗi khi yêu cầu dịch vụ nhận diện giọng nói; {e}")
-        return f"Lỗi khi yêu cầu dịch vụ nhận diện giọng nói; {e}"
+    if len(audio_array) > 0:
+        # file_data = {"file": ("recorded_audio.wav", io.BytesIO(audio_data), "audio/wav")}
+
+        # data_package = {"audio": "","text_target": text}
+        #
+        # response = requests.post("http://127.0.0.1:8000/danangvsr/vmd", data=data_package)
+
+        # if response.status_code == 200:
+        #     result = response.json()
+        #     self.response_label.config(text=f"Result: {result}")
+        # else:
+        #     self.response_label.config(text=f"Failed to fetch data. Status code: {response.status_code}")
+        print("Có audio")
+        return "Có audio"
+    else:
+        return "Âm thanh lỗi!!"

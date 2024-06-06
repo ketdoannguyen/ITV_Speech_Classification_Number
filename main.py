@@ -1,6 +1,11 @@
+import time
 import tkinter as tk
 import threading
-from event import get_fish_slices, get_id_user_from_voice
+import wave
+
+import pyaudio
+
+from event import get_fish_slices, send_audio
 from PIL import Image, ImageTk
 
 
@@ -22,23 +27,30 @@ class FishWeightApp:
         self.right_frame = tk.Frame(self.main_frame, bg="#E0E0E0", bd=5, relief="groove")
         self.right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # Phần bên trái: Hiển thị số lát cá đã cân được
+        # Phần bên trái: Hiển thị số lát cá đã cân được từ cân điện tử
         self.fish_slices_label = tk.Label(self.left_frame, text="Số lát cá đã cân:", font=("Arial", 18, "bold"),
                                           bg="#F0F0F0")
         self.fish_slices_label.pack(pady=20)
 
+        self.fish_slices = tk.StringVar(value=get_fish_slices())
+        self.fish_slices_display = tk.Label(self.left_frame, textvariable=self.fish_slices, font=("Arial", 48, "bold"),
+                                            bg="#F0F0F0", fg="#007BFF")
+
+        # Tạo nút và đặt command đúng
+        self.recognize = tk.Button(self.left_frame, text="Thu", font=("Arial", 18, "bold"), command=self.click)
+        self.recognize.pack(pady=20)
+
+        self.recording = False
+
         # Phần bên phải: Hiển thị ID khi người dùng đọc
-        self.id_label = tk.Label(self.right_frame, text="ID người đã cân:", font=("Arial", 18, "bold"), bg="#E0E0E0")
+        self.id_label = tk.Label(self.right_frame, text="ID người cân:", font=("Arial", 18, "bold"), bg="#E0E0E0")
         self.id_label.pack(pady=20)
 
-        self.fish_slices = tk.IntVar(value=get_fish_slices())
-        self.fish_slices_display = tk.Label(self.left_frame, textvariable=self.fish_slices, font=("Arial", 40, "bold"),
-                                            bg="#F0F0F0", fg="#007BFF")
         self.fish_slices_display.pack(pady=20)
         self.update_fish_slices()
 
-        self.current_id = tk.IntVar(value=get_id_user_from_voice())
-        self.id_display = tk.Label(self.right_frame, textvariable=self.current_id, font=("Arial", 40, "bold"),
+        self.current_id = tk.StringVar()
+        self.id_display = tk.Label(self.right_frame, textvariable=self.current_id, font=("Arial", 28, "bold"),
                                    bg="#E0E0E0", fg="#FF5733")
         self.id_display.pack(pady=20)
 
@@ -48,22 +60,59 @@ class FishWeightApp:
         # Hiển thị hình ảnh khi khởi tạo
         self.display_image("./images/default.jpg")
 
-        # Khởi chạy nhận diện giọng nói trong một luồng riêng biệt sau khi UI đã được thiết lập
-        self.start_voice_recognition()
+    # Hàm click để thu âm
+    def click(self):
+        if self.recording:
+            self.recording = False
+            self.recognize.config(text="Thu")
 
+        else:
+            self.recording = True
+            self.recognize.config(text="Dừng")
+            threading.Thread(target=self.update_id).start()
+
+    # Hàm cập nhật ID, hình ảnh
+    def update_id(self):
+        id_user = self.get_id()
+        self.current_id.set(id_user)
+        self.display_image(id_user)
+
+    # Hàm lấy id sau khi đưa qua model
+    def get_id(self):
+        audio = pyaudio.PyAudio()
+        stream = audio.open(format=pyaudio.paInt16, channels=1, rate=44100, input=True, frames_per_buffer=1024)
+        frames = []
+
+        while self.recording:
+            data = stream.read(1024)
+            frames.append(data)
+
+        stream.stop_stream()
+        stream.close()
+        audio.terminate()
+
+        file_path_save = f"upload/record{int(time.time())}.wav"
+
+        print(f"File Path: {file_path_save}")
+
+        sound_file = wave.open(file_path_save, "wb")
+        sound_file.setnchannels(1)
+        sound_file.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
+        sound_file.setframerate(44100)
+        sound_file.writeframes(b"".join(frames))
+        sound_file.close()
+
+        numbers = send_audio(frames)
+        # print(f"Result: {numbers}")
+
+        return numbers
+
+    # Hàm cập nhật số cân sau mỗi 3s
     def update_fish_slices(self):
         self.fish_slices.set(get_fish_slices())
-        self.root.after(3000, self.update_fish_slices)  # Cập nhật số lát cá mỗi 5 giây
+        self.root.after(3000, self.update_fish_slices)
 
-    def start_voice_recognition(self):
-        threading.Thread(target=self.update_id, daemon=True).start()
-
-    def update_id(self):
-        while True:
-            id_user = get_id_user_from_voice()
-            self.current_id.set(id_user)
-            self.display_image(id_user)
-
+    # Hàm hiển thị hình ảnh
     def display_image(self, id_user):
         try:
             image_path = f"./images/{id_user}.jpg"  # Đường dẫn đến ảnh tương ứng với ID
