@@ -1,3 +1,4 @@
+import os
 import random
 import time
 
@@ -32,6 +33,9 @@ def send_audio(frame, OUT_WAV_FILE):
         r = requests.post(url=url, json=data)
 
         print(f"Chạy trong {time.time() - time_start}")
+
+        if os.path.exists(OUT_WAV_FILE):
+            os.remove(OUT_WAV_FILE)
 
         return r.json()['label']
 
