@@ -102,7 +102,7 @@ def main():
             r = requests.post(url=url, json=data)
 
             # Hiển thị thông báo
-            st.success(f"Kết quả dự đoán: {r.json()['label']}. Chạy trong {time.time() - time_start}")
+            st.success(f"Kết quả dự đoán: {r.json()['label']}. ")
             print(r.json())
             handle_feedback(None, r, OUT_WAV_FILE, is_click=False)
             if os.path.exists(OUT_WAV_FILE):
